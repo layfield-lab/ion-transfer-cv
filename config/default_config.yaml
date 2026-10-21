@@ -1,0 +1,61 @@
+# Default Configuration for Collective Variable Calculations
+
+system:
+  # Ion definition
+  ion:
+    name: "CL"           # GROMACS atom name
+    charge: -1.0         # Elementary charges
+    lj_sigma: 4.410      # Ångströms
+    lj_epsilon: 0.100    # kcal/mol
+
+  # Solvent 1 (e.g., water)
+  solvent1:
+    name: "SOL"          # GROMACS residue name
+    oxygen_name: "O"     # Oxygen atom name
+    charges: {O: -0.73, H: 0.365}
+    lj_sigma: {O: 3.204, H: 0.0}      # H not typically LJ-bonded
+    lj_epsilon: {O: 0.160, H: 0.0}
+
+  # Solvent 2 (e.g., DCM)
+  solvent2:
+    name: "DCM"          # GROMACS residue name
+    atom_names: [C, Cl, Cl, H]
+    charges: {C: -0.272, Cl: 0.1897, H: -0.0537}
+    lj_sigma: {C: 3.410, Cl: 3.450, H: 2.400}
+    lj_epsilon: {C: 0.137, Cl: 0.280, H: 0.040}
+
+# Bulk solvation energy extraction
+bulk_solvation:
+  method: "from_trajectory"          # How to extract U_bulk
+  water_region: "z < -10"            # Z cutoff for water bulk (Ångströms)
+  dcm_region: "z > 10"               # Z cutoff for DCM bulk
+  min_frames_fraction: 0.1            # Warn if < this fraction of frames in bulk
+  min_frames_absolute: 3              # Error if fewer than this many bulk frames
+
+# Water finger coordinate parameters
+water_finger:
+  ion_water_offset: -0.4             # Offset for ion-water vs water-water (Å)
+  rOO_max: 3.4                       # Maximum O-O H-bond distance (Å)
+  bulk_z_cutoff: 0.0                 # Z threshold for "bulk water" identification (Å)
+
+# Solvation coordinate parameters (future)
+solvation:
+  energy_cutoff: 20.0                # Energy cutoff for summation (Ångströms)
+
+# Numerical parameters
+numerics:
+  precision: "float64"               # float32 or float64
+  pbc: true                          # Apply periodic boundary conditions
+  k_coulomb: 332.0636                # Coulomb constant (kcal·Å/mol·e²)
+
+# Output settings
+output:
+  format: "plumed_colvar"            # Output format
+  print_interval: 100                # Print summary every N frames
+  verbose: true                      # Verbose logging
+
+# Trajectory reading
+trajectory:
+  stride: 1                          # Read every Nth frame
+  skip_first: 0                      # Skip first N frames
+  max_frames: null                   # Maximum frames to read (null = all)

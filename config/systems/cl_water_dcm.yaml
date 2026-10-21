@@ -1,0 +1,71 @@
+# Configuration for Cl⁻ Ion Transfer in Water/DCM System
+# Based on Kikkawa et al. (2015) and Karnes & Benjamin (2016)
+
+system:
+  # Chloride ion
+  ion:
+    name: "CL"
+    charge: -1.0
+    lj_sigma: 4.410      # Ångströms (from Karnes & Benjamin 2016)
+    lj_epsilon: 0.100    # kcal/mol
+
+  # Water (TIP3P-like based on papers)
+  solvent1:
+    name: "SOL"          # Standard GROMACS water residue
+    oxygen_name: "O"
+    charges: {O: -0.73, H: 0.365}
+    lj_sigma: {O: 3.204, H: 0.0}
+    lj_epsilon: {O: 0.160, H: 0.0}
+
+  # Dichloromethane (DCM) - 14 site model from Morita group
+  solvent2:
+    name: "DCM"
+    atom_names: [C, Cl, Cl, H]
+    charges: {C: -0.2720, Cl: 0.1897, H: -0.0537}
+    lj_sigma: {C: 3.410, Cl: 3.450, H: 2.400}
+    lj_epsilon: {C: 0.137, Cl: 0.280, H: 0.040}
+
+# Region definitions for bulk sampling
+bulk_solvation:
+  method: "from_trajectory"
+  water_region: "z < -10"      # Bulk water region: far from interface
+  dcm_region: "z > 10"         # Bulk DCM region: far from interface
+  min_frames_fraction: 0.05     # Warning if < 5% of frames in bulk
+  min_frames_absolute: 10       # Error if < 10 frames in bulk region
+
+# Water finger coordinate - specific to water/DCM interface
+water_finger:
+  ion_water_offset: -0.4       # Offset from Kikkawa et al. (2015)
+  rOO_max: 3.4                 # Max O-O distance for H-bonds
+  bulk_z_cutoff: -5.0          # Consider Z < -5 Å as bulk water
+
+  # These values are from the literature but can be adjusted
+  connectivity_offset_ion_water: -0.4  # Accounts for different first shell peaks
+
+# Solvation coordinates (for future use with s_W and s_NB)
+solvation:
+  # Bulk energies will be calculated from trajectory
+  # Set manually here if pre-calculated
+  U_bulk_water: null           # kcal/mol (auto-calculated if null)
+  U_bulk_dcm: null             # kcal/mol (auto-calculated if null)
+
+# Numerical settings appropriate for this system
+numerics:
+  precision: "float64"
+  pbc: true
+  k_coulomb: 332.0636          # Standard Coulomb constant
+  min_distance: 0.1            # Minimum distance cutoff (Ångströms)
+
+# Output configuration
+output:
+  format: "plumed_colvar"
+  filename: "cv_water_finger.colvar"
+  print_interval: 10           # Progress update every 10 frames
+  verbose: true
+  write_plumed_input: true     # Generate example PLUMED script
+
+# Trajectory reading options
+trajectory:
+  stride: 1                    # Read every frame (or increase for speed)
+  skip_first: 0               # Skip equilibration frames if needed
+  max_frames: null            # null = read all frames
